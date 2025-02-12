@@ -27,20 +27,18 @@ export const userLoginController = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       {
-        employeeId: 1,
+        employeeId: 0,
         role: "ADMIN",
       },
       process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
 
-    return res
-      .status(200)
-      .json({
-        status: "OK",
-        message: "Admin Login successful",
-        data: { token },
-      });
+    return res.status(200).json({
+      status: "OK",
+      message: "Admin Login successful",
+      data: { token },
+    });
   }
 
   // Check if email or employeeId already exists

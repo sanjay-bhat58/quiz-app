@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import usersRouter from "./routes/usersRoute.js";
 import sequelize from "./database/database.js";
+import questionsRouter from "./routes/questionsRoute.js";
 
 const app = express();
 app.use(express.json());
@@ -27,5 +28,6 @@ async function initializeServer() {
 }
 
 app.use(usersRouter);
+app.use(questionsRouter);
 
 initializeServer();
