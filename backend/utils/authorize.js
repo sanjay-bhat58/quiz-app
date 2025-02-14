@@ -17,9 +17,9 @@ const authorize = (req, res, next) => {
 
     next(); // Move to controller
   } catch (error) {
-    return res.status(403).json({
-      status: "FORBIDDEN",
-      message: "Forbidden: Invalid or expired token",
+    return res.status(401).json({
+      status: "UNAUTHORIZED",
+      message: "Unauthorized: Invalid or expired token",
     });
   }
 };

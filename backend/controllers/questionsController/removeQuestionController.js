@@ -15,7 +15,7 @@ export const removeQuestionController = async (req, res) => {
   if (role !== "ADMIN") {
     return res.status(403).json({
       status: "FORBIDDEN",
-      message: "You are not authorized to add questions",
+      message: "You are not authorized to remove questions",
     });
   }
 
