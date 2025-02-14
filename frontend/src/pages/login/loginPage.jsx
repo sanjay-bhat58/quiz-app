@@ -12,8 +12,13 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import LoginBackgroundImage from "../../assets/login-bg-image.jpg";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useLoading } from "../../contexts/loaderContext/loaderHook";
+import { useAxios } from "../../contexts/axiosContext/axiosHook";
+import { decodeJWT } from "../../utils/functions/decodeJwt";
+import { useAuth } from "../../contexts/authContext/authHook";
+import { useNavigate } from "react-router";
+import { useSnackbar } from "../../contexts/snackbarContext/snackbarHook";
 
 const LoginPageWrapper = styled.div`
   display: flex;
@@ -46,7 +51,14 @@ const StyledButton = styled(Button)`
 `;
 
 const LoginPage = () => {
+  // hooks
   const { setLoading } = useLoading();
+  const { axiosInstance } = useAxios();
+  const { setUserName, setUserRole } = useAuth();
+  const { handleSnackbarOpen } = useSnackbar();
+  const navigate = useNavigate();
+
+  // state variables
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [isSignUpOpen, setSignUpOpen] = useState(false);
@@ -54,6 +66,70 @@ const LoginPage = () => {
   const [signUpEmail, setSignUpEmail] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
   const [employeeId, setEmployeeId] = useState("");
+
+  // functions
+  const handleLogin = useCallback(
+    async (email, password) => {
+      setLoading(true);
+      try {
+        if (axiosInstance) {
+          const response = await axiosInstance.post("userLogin", {
+            email: email,
+            password: password,
+          });
+          localStorage.setItem("token", response.data.data.token);
+          const decodedToken = decodeJWT(response.data.data.token);
+          handleSnackbarOpen(response.data.message, "success");
+          setUserRole(decodedToken.userRole);
+          setUserName(decodedToken.userName);
+          navigate("/");
+        }
+      } catch (err) {
+        if (err.response?.data?.message) {
+          handleSnackbarOpen(err.response.data.message, "error");
+        } else {
+          handleSnackbarOpen("Something went wrong", "error");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      setLoading,
+      axiosInstance,
+      setUserRole,
+      setUserName,
+      navigate,
+      handleSnackbarOpen,
+    ]
+  );
+
+  const handleSignUp = useCallback(
+    async (fullName, email, employeeId, password) => {
+      setLoading(true);
+      try {
+        if (axiosInstance) {
+          const response = await axiosInstance.post("createAccount", {
+            name: fullName,
+            email,
+            employeeId,
+            password,
+          });
+          handleSnackbarOpen(response.data.message, "success");
+          setSignUpOpen(false);
+        }
+      } catch (err) {
+        if (err.response?.data?.message) {
+          handleSnackbarOpen(err.response.data.message, "error");
+        } else {
+          handleSnackbarOpen("Something went wrong", "error");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [axiosInstance, handleSnackbarOpen, setLoading]
+  );
 
   return (
     <LoginPageWrapper>
@@ -85,7 +161,7 @@ const LoginPage = () => {
           <StyledButton
             fullWidth
             variant="contained"
-            onClick={() => setLoading(true)}
+            onClick={() => handleLogin(loginEmail, loginPassword)}
           >
             Sign In
           </StyledButton>
@@ -146,8 +222,14 @@ const LoginPage = () => {
             onChange={(e) => setSignUpPassword(e.target.value)}
           />
 
-          <StyledButton fullWidth variant="contained">
-            Sign Up
+          <StyledButton
+            fullWidth
+            variant="contained"
+            onClick={() =>
+              handleSignUp(fullName, signUpEmail, employeeId, signUpPassword)
+            }
+          >
+            Register
           </StyledButton>
         </DialogContent>
       </Dialog>
