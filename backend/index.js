@@ -1,11 +1,13 @@
 import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
+import cors from "cors";
 import usersRouter from "./routes/usersRoute.js";
 import sequelize from "./database/database.js";
 import questionsRouter from "./routes/questionsRoute.js";
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // Test the connection and start server only if successful

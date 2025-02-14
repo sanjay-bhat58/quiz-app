@@ -27,8 +27,8 @@ export const userLoginController = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       {
-        employeeId: 0,
-        role: "ADMIN",
+        userName: "Admin User",
+        userRole: "ADMIN",
       },
       process.env.JWT_SECRET,
       { expiresIn: "24h" }
@@ -46,7 +46,7 @@ export const userLoginController = async (req, res) => {
     where: {
       email: email,
     },
-    attributes: ["password", "employeeId"],
+    attributes: ["password", "name"],
   });
 
   if (!userData) {
@@ -61,8 +61,8 @@ export const userLoginController = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       {
-        employeeId: userData.employeeId,
-        role: "USER",
+        userRole: "USER",
+        userName: userData.name,
       },
       process.env.JWT_SECRET,
       { expiresIn: "24h" }
